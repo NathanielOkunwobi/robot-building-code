@@ -1,5 +1,6 @@
-//odometerTesting - uses the odometers on either side of the robot to determine the 
-//distance travelled by each side of the robot in centimetres
+//goalTrackingSimplification - uses the odometers on either side of the robot to determine the 
+//distance travelled by each side of the robot
+//Written by Nathaniel Okunwobi
 
 //definitions for the pins used
 #define rightSpeedPin 9 //pwm output for motor controller for right motors for speed
@@ -8,16 +9,13 @@
 #define leftSpeedPin 6 //pwm output for motor controller for left motors for speed
 #define leftMotorDirPin1 7 //digital output for direction for left motor 1
 #define leftMotorDirPin2 8 //digital output for direction of right motor 2
-#define encoderLeft 2 //
-#define encoderRight 3 //
+#define encoderLeftPin 2 //left encoder output
 
-//
-String currentMovement = String("You should not see this.");
-long currentX = 0;
-long currentY = 0;
-long xGoal = 1000;
-long yGoal = 1000;
-bool axisSwitch = false;
+//creating global variables
+long leftEncoderCount = 0;
+String robotSteps = {} //fill in with route determined, format is command then amount (degrees for rotation and encoder count for )
+int moveTime = 125;
+int turnTime = 250;
 
 //forward() function - moves the robot forward
 void forward(){
@@ -25,8 +23,20 @@ void forward(){
   digitalWrite(rightMotorDirPin2,LOW);
   digitalWrite(leftMotorDirPin1,HIGH);
   digitalWrite(leftMotorDirPin2,LOW);
-  currentMovement = String("Forward");
+  Serial.println("Forward");
 }
+
+ //backward() function - moves the robot backward
+void backward(){
+  digitalWrite(rightMotorDirPin1,LOW);
+  digitalWrite(rightMotorDirPin2,HIGH);
+  digitalWrite(leftMotorDirPin1,LOW);
+  digitalWrite(leftMotorDirPin2,HIGH);
+  analogWrite(leftSpeedPin,150); 
+  analogWrite(rightSpeedPin,150);  
+  Serial.println("Backward");
+}
+
 //left() function - turns the robot left
 void left(){
   digitalWrite(rightMotorDirPin1,HIGH);
@@ -35,8 +45,9 @@ void left(){
   digitalWrite(leftMotorDirPin2,HIGH);
   analogWrite(leftSpeedPin,150); 
   analogWrite(rightSpeedPin,150);
-  currentMovement = String("Left");
+  Serial.println("Left");
 }
+
 //right() function - turns the robot right
 void right(){
   digitalWrite(rightMotorDirPin1,LOW);
@@ -45,18 +56,9 @@ void right(){
   digitalWrite(leftMotorDirPin2,LOW);
   analogWrite(leftSpeedPin,150); 
   analogWrite(rightSpeedPin,150);
-  currentMovement = String("Right"); 
+  Serial.println("Right"); 
 }
-//backward() function - moves the robot backward
-void backward(){
-  digitalWrite(rightMotorDirPin1,LOW);
-  digitalWrite(rightMotorDirPin2,HIGH);
-  digitalWrite(leftMotorDirPin1,LOW);
-  digitalWrite(leftMotorDirPin2,HIGH);
-  analogWrite(leftSpeedPin,150); 
-  analogWrite(rightSpeedPin,150);  
-  currentMovement = String("Backward");
-}
+
 //stop() function - stops the movement of the robot
 void stop(){
   digitalWrite(rightMotorDirPin1,LOW);
@@ -65,8 +67,9 @@ void stop(){
   digitalWrite(leftMotorDirPin2,LOW);
   analogWrite(leftSpeedPin,0); 
   analogWrite(rightSpeedPin,0);  
-  currentMovement = String("Stop");
+  Serial.println("Stop");
 }
+
 //
 void setup() {
   pinMode(rightMotorDirPin1, OUTPUT); 
@@ -77,32 +80,79 @@ void setup() {
   pinMode(rightSpeedPin, OUTPUT); 
   pinMode(encoderLeft, INPUT);
   pinMode(encoderRight, INPUT);
-  attachInterrupt(digitalPinToInterrupt(encoderLeft), encoderLeftISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoderLeftPin), encoderLeftISR, CHANGE);
   stop();  
   Serial.begin(4800); //initialize serial for debugging
 }
+
 //
 void loop() {
   pathToGoal();
 }
+
 //
 void pathToGoal() {
-  while (currentX < xGoal){
-    forward();
-  }
-  stop();
-  left();
-  while (currentY < yGoal){
-    forward();
-  }
-  stop();
-  Serial.println(currentMovement);
+  String currentAction = "";
+  int actionAmount = "";
+  //send two pairs of items in the array of actions to actionReader which interprets and performs the action until the array has been emptied as I will take the front two items of the array every time out of the list
 }
+
+//
+void actionReader(String action, int amount){
+  if (action.indexOf("Forward") > 0){
+    while (leftEncoderCount < amount){
+      forward();
+      delay(moveTime);
+      stop();
+    }
+    stop();
+    leftEncoderCount = 0;
+  }else if (action.indexOf("Backward") > 0){
+    while (leftEncoderCount < amount){
+      backward();
+      delay(moveTime);
+      stop();
+    }
+    stop();
+    leftEncoderCount = 0;
+  }else if (action.indexOf("Left") > 0){
+    if (amount == 0 || amount == 360){
+      stop();
+    }else if (amount == 90){
+      left();
+      delay(turnTime);
+    }else if (amount == 180){
+      left();
+      delay(turnTime*2);
+    }else if (amount == 270){
+      left();
+      delay(turnTime*3);
+    }else{
+      stop();
+    }
+    stop();
+  }else if (action.indexOf("Right") > 0){
+    if (amount == 0 || amount == 360){
+      stop();
+    }else if (amount == 90){
+      right();
+      delay(turnTime);
+    }else if (amount == 180){
+      right();
+      delay(turnTime*2);
+    }else if (amount == 270){
+      right();
+      delay(turnTime*3);
+    }else{
+      stop();
+    }
+    stop();
+  }else{
+    stop();
+  }
+}
+
+//
 void encoderLeftISR(){
-  if (!axisSwitch){
-    currentX++;
-  }
-  else{
-    currentY++;
-  }
+  leftEncoderCount ++;
 }
