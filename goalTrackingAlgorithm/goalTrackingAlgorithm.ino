@@ -1,5 +1,5 @@
 //[REMOVE ONCE DONE] TO DO:
-//Add watch() and watchSurrounding() with checks for 3 directions
+
 //switch to obstacle avoidance if any direction detects somethings
 //switch back to goalTrack once it is done
 //repeat until the goal position is reached
@@ -32,9 +32,15 @@ int leftScan, centerScan, rightScan, leftDiagonalScan, rightDiagonalScan;
 const int distanceLimit = 15; //in cm, was 15
 const int xGoal = 100;
 const int yGoal = 100;
+Servo head;
+bool backw = false;
+bool forw = false;
 
 //forward() function - moves the robot forward
 void forward(){
+  Serial.println("Forward");
+  forw = true;
+  backw = false;
   digitalWrite(rightMotorDirPin1,HIGH);
   digitalWrite(rightMotorDirPin2,LOW);
   digitalWrite(leftMotorDirPin1,HIGH);
@@ -44,7 +50,7 @@ void forward(){
 }
 //left() function - turns the robot left
 void left(){
-  if xAxis == true{
+  if (xAxis == true){
     xAxis = false;
     yAxis = true;
   }else{
@@ -62,7 +68,7 @@ void left(){
 }
 //right() function - turns the robot right
 void right(){
-  if xAxis == true{
+  if (xAxis == true){
     xAxis = false;
     yAxis = true;
   }else{
@@ -80,6 +86,8 @@ void right(){
 }
 //backward() function - moves the robot backward
 void backward(){
+  forw = false;
+  backw = true;
   digitalWrite(rightMotorDirPin1,LOW);
   digitalWrite(rightMotorDirPin2,HIGH);
   digitalWrite(leftMotorDirPin1,LOW);
@@ -95,7 +103,6 @@ void stop(){
   digitalWrite(leftMotorDirPin2,LOW);
   analogWrite(leftSpeedPin,0); 
   analogWrite(rightSpeedPin,0);  
-  currentMovement = String("Stop");
 }
 //
 void setup() {
@@ -113,6 +120,7 @@ void setup() {
   digitalWrite(triggerPin,LOW);
   head.attach(servoPin); 
   head.write(90);
+  Serial.begin(4800);
 }
 //watch() function - 
 int watch(){
@@ -142,7 +150,7 @@ String watchSurrounding(){
     stop();
      obstacleStatus  =obstacleStatus | B1000;
     }
-  head.write(170); //Didn't use 180 degrees because my servo is not able to take this angle
+  head.write(170); //
   delay(300);
   leftScan = watch();
   if(leftScan<distanceLimit){
@@ -194,64 +202,30 @@ void loop(){
 }
 //[REMOVE ONCE DONE, ADAPT TO RUN PROPERLY WITH THIS ALGORITHM]
 void obstacleAvoidance(String obstacleSign) {
-    if(obstacleSign == "10000"){ //move slightly right
-      setSpeed(fastSpeed,speed);
-      forward();
-      delay(turnTime);
-      stop();
-    }
-    else if(obstacleSign == "00001"){ //move slightly left
-      setSpeed(speed,fastSpeed);
-      forward();
-      delay(turnTime);
-      stop();
-    }
-    else if(obstacleSign=="11100" || obstacleSign=="01000" || obstacleSign=="11000"  || obstacleSign=="10100"  || obstacleSign=="01100" ||obstacleSign=="00100"  ||obstacleSign=="01000" ){ //move hard right (?) and back
-	    right();
-		  setSpeed(turnSpeed,turnSpeed);
-      delay(turnTime);
-      stop();
-    }
-    else if(obstacleSign=="00010" || obstacleSign=="00111" || obstacleSign=="00011"  || obstacleSign=="00101" || obstacleSign=="00110" || obstacleSign=="01010"){
-      left();
-      setSpeed(turnSpeed,turnSpeed);
-      delay(turnTime);
-      stop();
-    }
-    else if(obstacleSign=="01111" || obstacleSign=="10111" || obstacleSign=="11111"){
-	    left();
-		  setSpeed(fastSpeed,speed);
-      delay(turnTime);
-      stop();
-    } 
-    else if(obstacleSign=="11011" || obstacleSign=="11101"  ||  obstacleSign=="11110"  || obstacleSign=="01110"  ){
-      right();
-      setSpeed(speed,fastSpeed);
-      delay(turnTime);
-      stop();
-    }     
-    numCycles=0; //restart cycle counter
-  } 
-  else{
-    setSpeed(speed,speed);
-    forward();  // if nothing is present in front moves forward
-    delay(turnTime);
+  if(obstacleSign=="11011" || obstacleSign=="11101"  ||  obstacleSign=="11110"  || obstacleSign=="01110" || obstacleSign == "10000" || obstacleSign=="11100" || obstacleSign=="01000" || obstacleSign=="11000"  || obstacleSign=="10100"  || obstacleSign=="01100" ||obstacleSign=="00100"  ||obstacleSign=="01000" ){ //move hard right (?) and back
+    backward();
+    delay(1000);
+    stop();
+    right();
+    forward();
+    delay(1000);
     stop();
   }
-  distance = watch(); // use the watch() function to see if anything is ahead (when the robot is just moving forward and not looking around it will test the distance in front)
-  if (distance < distanceLimit){ //the robot will just stop if it is completely sure there is an obstacle ahead after 25 tests
-    right();
-    setSpeed(speed,fastSpeed);
-    delay(turnTime*3/2);
-    ++thereis;
+  else if(obstacleSign=="01111" || obstacleSign=="10111" || obstacleSign=="11111" || obstacleSign == "00001" || obstacleSign=="00010" || obstacleSign=="00111" || obstacleSign=="00011"  || obstacleSign=="00101" || obstacleSign=="00110" || obstacleSign=="01010"){
+    backward();
+    delay(1000);
+    stop();
+    left();
+    forward();
+    delay(1000);
+    stop();
   }
-  if (distance > distanceLimit){
-    thereis = 0; //count of distance checks is restarted
-  }
-  if (thereis > 25){
-    stop(); //stop moving as an obstacle is ahead
-    thereis = 0;
-  }
+  //else{
+    //setSpeed(speed,speed);
+    //forward();  // if nothing is present in front moves forward
+    //delay(1);
+    //stop();
+  //}
 }
 //
 void goalTrack(){
@@ -294,17 +268,17 @@ void goalTrack(){
 }
 //
 void encoderISR(){
-  if backward == true{
-    if xAxis == true{
-      xAxis --;
+  if (backw == true){
+    if (xAxis == true){
+      xEncoderCount --;
     }else{
-      yAxis --;
+      yEncoderCount --;
     }
   }else{
-    if xAxis == true{
-      xAxis ++;
+    if (xAxis == true){
+      xEncoderCount ++;
     }else{
-      yAxis ++;
+      yEncoderCount ++;
     }
   }
 }

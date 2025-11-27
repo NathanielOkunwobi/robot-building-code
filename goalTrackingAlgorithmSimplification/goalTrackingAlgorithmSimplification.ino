@@ -12,11 +12,12 @@
 #define encoderRight 3 //
 
 //
-String currentMovement = String("You should see this.");
-long leftEncoderCount = 0;
-long leftLastEncoderCount = 0;
-long rightEncoderCount = 0;
-long rightLastEncoderCount = 0;
+String currentMovement = String("You should not see this.");
+long currentX = 0;
+long currentY = 0;
+long xGoal = 1000;
+long yGoal = 1000;
+bool axisSwitch = false;
 
 //forward() function - moves the robot forward
 void forward(){
@@ -77,70 +78,31 @@ void setup() {
   pinMode(encoderLeft, INPUT);
   pinMode(encoderRight, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoderLeft), encoderLeftISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(encoderRight), encoderRightISR, CHANGE);
   stop();  
   Serial.begin(4800); //initialize serial for debugging
 }
 //
 void loop() {
-  testPathOne();
+  pathToGoal();
 }
 //
-void testPathOne() {
-  leftLastEncoderCount = leftEncoderCount;
-  rightLastEncoderCount = rightEncoderCount;
-  forward();
-  Serial.println(currentMovement);
-  delay(1500);
+void pathToGoal() {
+  while (currentX < xGoal){
+    forward();
+  }
   stop();
-  encoderCounter(leftLastEncoderCount, rightLastEncoderCount);
-
-  leftLastEncoderCount = leftEncoderCount;
-  rightLastEncoderCount = rightEncoderCount;
-  backward();
-  Serial.println(currentMovement);
-  delay(1500);
-  stop();
-  encoderCounter(leftLastEncoderCount, rightLastEncoderCount);
-
-  leftLastEncoderCount = leftEncoderCount;
-  rightLastEncoderCount = rightEncoderCount;
   left();
-  Serial.println(currentMovement);
-  delay(1500);
+  while (currentY < yGoal){
+    forward();
+  }
   stop();
-  encoderCounter(leftLastEncoderCount, rightLastEncoderCount);
-
-  leftLastEncoderCount = leftEncoderCount;
-  rightLastEncoderCount = rightEncoderCount;
-  right();
   Serial.println(currentMovement);
-  delay(1500);  
-  stop();
-  encoderCounter(leftLastEncoderCount, rightLastEncoderCount);
 }
-//
-void testPathTwo() {
-  leftLastEncoderCount = leftEncoderCount;
-  rightLastEncoderCount = rightEncoderCount;
-  forward();
-  Serial.println(currentMovement);
-  delay(1500);
-  stop();
-  encoderCounter(leftLastEncoderCount, rightLastEncoderCount);
-}
-//
-void encoderCounter(int leftLastEncoderCount, int rightLastEncoderCount){
-  Serial.println(leftEncoderCount);
-  Serial.println((leftEncoderCount - leftLastEncoderCount));
-  Serial.println(rightEncoderCount);
-  Serial.println((rightEncoderCount - rightLastEncoderCount));
-}
-//
 void encoderLeftISR(){
-  leftEncoderCount++;
-}
-//
-void encoderRightISR(){
-  rightEncoderCount++;
+  if (!axisSwitch){
+    currentX++;
+  }
+  else{
+    currentY++;
+  }
 }
