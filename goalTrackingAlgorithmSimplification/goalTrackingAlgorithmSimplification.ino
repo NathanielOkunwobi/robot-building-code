@@ -13,7 +13,7 @@
 
 //creating global variables
 long leftEncoderCount = 0;
-String robotSteps = {} //fill in with route determined, format is command then amount (degrees for rotation and encoder count for )
+String robotSteps[] = {}; //fill in with route determined, format is command then amount (degrees for rotation and encoder count for translation)
 int moveTime = 125;
 int turnTime = 250;
 
@@ -70,7 +70,7 @@ void stop(){
   Serial.println("Stop");
 }
 
-//
+//sets the mode of all of the defined pins, attaches the ISR and sets up serial
 void setup() {
   pinMode(rightMotorDirPin1, OUTPUT); 
   pinMode(rightMotorDirPin2, OUTPUT); 
@@ -78,26 +78,28 @@ void setup() {
   pinMode(leftMotorDirPin1, OUTPUT);
   pinMode(leftMotorDirPin2, OUTPUT); 
   pinMode(rightSpeedPin, OUTPUT); 
-  pinMode(encoderLeft, INPUT);
-  pinMode(encoderRight, INPUT);
+  pinMode(encoderLeftPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoderLeftPin), encoderLeftISR, CHANGE);
   stop();  
   Serial.begin(4800); //initialize serial for debugging
 }
 
-//
+//calls pathToGoal() continuously when the robot is on
 void loop() {
   pathToGoal();
 }
 
-//
-void pathToGoal() {
+//goes through the robotSteps string array to get instructions and calls actionReader to run them
+void pathToGoal(){
   String currentAction = "";
   int actionAmount = "";
-  //send two pairs of items in the array of actions to actionReader which interprets and performs the action until the array has been emptied as I will take the front two items of the array every time out of the list
+  int arrLength = sizeof(robotSteps)/sizeof(robotSteps[0]);
+  for (int i=0; i<arrLength; i+=2){
+    actionReader(robotSteps[i],(robotSteps[i+1]).toInt());
+  }
 }
 
-//
+//interprets a string and a number into an instruction that the robot needs to perform
 void actionReader(String action, int amount){
   if (action.indexOf("Forward") > 0){
     while (leftEncoderCount < amount){
@@ -131,6 +133,7 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
+    leftEncoderCount = 0;
   }else if (action.indexOf("Right") > 0){
     if (amount == 0 || amount == 360){
       stop();
@@ -150,9 +153,10 @@ void actionReader(String action, int amount){
   }else{
     stop();
   }
+  leftEncoderCount = 0;
 }
 
-//
+//adds one to the left encoder count whenever a pulse is recieved from it
 void encoderLeftISR(){
   leftEncoderCount ++;
 }
