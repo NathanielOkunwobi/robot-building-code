@@ -1,5 +1,4 @@
-//goalTrackingSimplification - uses the odometers on either side of the robot to determine the 
-//distance travelled by each side of the robot
+//commandFollower - follows the commands contained within an array 
 //Written by Nathaniel Okunwobi
 
 //definitions for the pins used
@@ -9,13 +8,15 @@
 #define leftSpeedPin 6 //pwm output for motor controller for left motors for speed
 #define leftMotorDirPin1 7 //digital output for direction for left motor 1
 #define leftMotorDirPin2 8 //digital output for direction of right motor 2
-#define encoderLeftPin 2 //left encoder output
+#define encoderLeftPin 3 //left encoder output
 
 //creating global variables
 long leftEncoderCount = 0;
-String robotSteps[] = {}; //fill in with route determined, format is command then amount (degrees for rotation and encoder count for translation)
+//String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; //fill in with route determined, format is command then amount (degrees for rotation and encoder count for translation)
+String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "10", "Left", "50", "Forward", "100", "Right", "50", "Forward", "10", "Right", "50", "Forward", "100"};
 int moveTime = 125;
-int turnTime = 250;
+int turnTime = 25;
+bool runComplete = false;
 
 //forward() function - moves the robot forward
 void forward(){
@@ -23,6 +24,8 @@ void forward(){
   digitalWrite(rightMotorDirPin2,LOW);
   digitalWrite(leftMotorDirPin1,HIGH);
   digitalWrite(leftMotorDirPin2,LOW);
+  analogWrite(leftSpeedPin,150); 
+  analogWrite(rightSpeedPin,150);  
   Serial.println("Forward");
 }
 
@@ -94,14 +97,20 @@ void pathToGoal(){
   String currentAction = "";
   int actionAmount = "";
   int arrLength = sizeof(robotSteps)/sizeof(robotSteps[0]);
-  for (int i=0; i<arrLength; i+=2){
-    actionReader(robotSteps[i],(robotSteps[i+1]).toInt());
+  if (!runComplete){
+    for (int i=0; i<arrLength; i+=2){
+      actionReader(robotSteps[i],(robotSteps[i+1]).toInt());
+    }
+    runComplete = true;
+  }
+  else{
+    stop();
   }
 }
 
 //interprets a string and a number into an instruction that the robot needs to perform
 void actionReader(String action, int amount){
-  if (action.indexOf("Forward") > 0){
+  if (action == "Forward"){
     while (leftEncoderCount < amount){
       forward();
       delay(moveTime);
@@ -109,7 +118,7 @@ void actionReader(String action, int amount){
     }
     stop();
     leftEncoderCount = 0;
-  }else if (action.indexOf("Backward") > 0){
+  }else if (action == "Backward"){
     while (leftEncoderCount < amount){
       backward();
       delay(moveTime);
@@ -117,39 +126,22 @@ void actionReader(String action, int amount){
     }
     stop();
     leftEncoderCount = 0;
-  }else if (action.indexOf("Left") > 0){
-    if (amount == 0 || amount == 360){
-      stop();
-    }else if (amount == 90){
+  }else if (action == "Left"){
+    while (leftEncoderCount < amount){
       left();
       delay(turnTime);
-    }else if (amount == 180){
-      left();
-      delay(turnTime*2);
-    }else if (amount == 270){
-      left();
-      delay(turnTime*3);
-    }else{
       stop();
     }
     stop();
     leftEncoderCount = 0;
-  }else if (action.indexOf("Right") > 0){
-    if (amount == 0 || amount == 360){
-      stop();
-    }else if (amount == 90){
+  }else if (action == "Right"){
+    while (leftEncoderCount < amount){
       right();
       delay(turnTime);
-    }else if (amount == 180){
-      right();
-      delay(turnTime*2);
-    }else if (amount == 270){
-      right();
-      delay(turnTime*3);
-    }else{
       stop();
     }
     stop();
+    leftEncoderCount = 0;
   }else{
     stop();
   }
