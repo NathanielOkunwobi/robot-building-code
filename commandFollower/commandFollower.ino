@@ -8,11 +8,12 @@
 #define leftSpeedPin 6 //pwm output for motor controller for left motors for speed
 #define leftMotorDirPin1 7 //digital output for direction for left motor 1
 #define leftMotorDirPin2 8 //digital output for direction of right motor 2
-#define encoderLeftPin 3 //left encoder output
+#define encoderRightPin 3 //right encoder output
 
 //creating global variables
-long leftEncoderCount = 0;
-//String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; //fill in with route determined, format is command then amount (degrees for rotation and encoder count for translation)
+long rightEncoderCount = 0;
+//routes to be followed, format is command then amount (degrees for rotation and encoder count for translation), select between one of the two
+//String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; 
 String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "10", "Left", "50", "Forward", "100", "Right", "50", "Forward", "10", "Right", "50", "Forward", "100"};
 int moveTime = 125;
 int turnTime = 25;
@@ -81,8 +82,8 @@ void setup() {
   pinMode(leftMotorDirPin1, OUTPUT);
   pinMode(leftMotorDirPin2, OUTPUT); 
   pinMode(rightSpeedPin, OUTPUT); 
-  pinMode(encoderLeftPin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(encoderLeftPin), encoderLeftISR, CHANGE);
+  pinMode(encoderRightPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoderRightPin), encoderRightISR, CHANGE);
   stop();  
   Serial.begin(4800); //initialize serial for debugging
 }
@@ -111,44 +112,44 @@ void pathToGoal(){
 //interprets a string and a number into an instruction that the robot needs to perform
 void actionReader(String action, int amount){
   if (action == "Forward"){
-    while (leftEncoderCount < amount){
+    while (rightEncoderCount < amount){
       forward();
       delay(moveTime);
       stop();
     }
     stop();
-    leftEncoderCount = 0;
+    rightEncoderCount = 0;
   }else if (action == "Backward"){
-    while (leftEncoderCount < amount){
+    while (rightEncoderCount < amount){
       backward();
       delay(moveTime);
       stop();
     }
     stop();
-    leftEncoderCount = 0;
+    rightEncoderCount = 0;
   }else if (action == "Left"){
-    while (leftEncoderCount < amount){
+    while (rightEncoderCount < amount){
       left();
       delay(turnTime);
       stop();
     }
     stop();
-    leftEncoderCount = 0;
+    rightEncoderCount = 0;
   }else if (action == "Right"){
-    while (leftEncoderCount < amount){
+    while (rightEncoderCount < amount){
       right();
       delay(turnTime);
       stop();
     }
     stop();
-    leftEncoderCount = 0;
+    rightEncoderCount = 0;
   }else{
     stop();
   }
-  leftEncoderCount = 0;
+  rightEncoderCount = 0;
 }
 
 //adds one to the left encoder count whenever a pulse is recieved from it
-void encoderLeftISR(){
-  leftEncoderCount ++;
+void encoderRightISR(){
+  rightEncoderCount ++;
 }
