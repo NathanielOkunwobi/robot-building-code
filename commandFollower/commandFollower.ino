@@ -9,12 +9,15 @@
 #define leftMotorDirPin1 7 //digital output for direction for left motor 1
 #define leftMotorDirPin2 8 //digital output for direction of right motor 2
 #define encoderRightPin 3 //right encoder output
+#define encoderLeftPin 2 //left encoder output
+
 
 //creating global variables
 long rightEncoderCount = 0;
-//routes to be followed, format is command then amount (degrees for rotation and encoder count for translation), select between one of the two
+long leftEncoderCount = 0;
+//routes to be followed, format is command then amount (encoder count for rotation and encoder count for translation), select between one of the two
 //String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; 
-String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "10", "Left", "50", "Forward", "100", "Right", "50", "Forward", "10", "Right", "50", "Forward", "100"};
+String robotSteps[] = {"Forward", "50", "Left", "25", "Forward", "15", "Left", "30", "Forward", "50", "Right", "25", "Forward", "15", "Right", "30", "Forward", "50"};
 int moveTime = 125;
 int turnTime = 25;
 bool runComplete = false;
@@ -48,7 +51,7 @@ void left(){
   digitalWrite(leftMotorDirPin1,LOW);
   digitalWrite(leftMotorDirPin2,HIGH);
   analogWrite(leftSpeedPin,150); 
-  analogWrite(rightSpeedPin,150);
+  analogWrite(rightSpeedPin,0);
   Serial.println("Left");
 }
 
@@ -58,7 +61,7 @@ void right(){
   digitalWrite(rightMotorDirPin2,HIGH);
   digitalWrite(leftMotorDirPin1,HIGH);
   digitalWrite(leftMotorDirPin2,LOW);
-  analogWrite(leftSpeedPin,150); 
+  analogWrite(leftSpeedPin,0); 
   analogWrite(rightSpeedPin,150);
   Serial.println("Right"); 
 }
@@ -83,7 +86,9 @@ void setup() {
   pinMode(leftMotorDirPin2, OUTPUT); 
   pinMode(rightSpeedPin, OUTPUT); 
   pinMode(encoderRightPin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(encoderRightPin), encoderRightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoderRightPin), encoderRightISR, RISING);
+  pinMode(encoderLeftPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoderLeftPin), encoderLeftISR, RISING);
   stop();  
   Serial.begin(4800); //initialize serial for debugging
 }
@@ -111,6 +116,8 @@ void pathToGoal(){
 
 //interprets a string and a number into an instruction that the robot needs to perform
 void actionReader(String action, int amount){
+  rightEncoderCount = 0;
+  leftEncoderCount = 0;
   if (action == "Forward"){
     while (rightEncoderCount < amount){
       forward();
@@ -118,7 +125,7 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    rightEncoderCount = 0;
+    //rightEncoderCount = 0;
   }else if (action == "Backward"){
     while (rightEncoderCount < amount){
       backward();
@@ -126,15 +133,15 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    rightEncoderCount = 0;
+    //rightEncoderCount = 0;
   }else if (action == "Left"){
-    while (rightEncoderCount < amount){
+    while (leftEncoderCount < amount){
       left();
       delay(turnTime);
       stop();
     }
     stop();
-    rightEncoderCount = 0;
+    //rightEncoderCount = 0;
   }else if (action == "Right"){
     while (rightEncoderCount < amount){
       right();
@@ -142,14 +149,20 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    rightEncoderCount = 0;
+    //leftEncoderCount = 0;
   }else{
     stop();
   }
   rightEncoderCount = 0;
+  leftEncoderCount = 0;
 }
 
 //adds one to the left encoder count whenever a pulse is recieved from it
 void encoderRightISR(){
   rightEncoderCount ++;
+}
+
+//adds one to the left encoder count whenever a pulse is recieved from it
+void encoderLeftISR(){
+  leftEncoderCount ++;
 }
