@@ -13,7 +13,7 @@
 #define echoPin 2 //pin for signal from ultrasonic sensor
 #define triggerPin 10 //pin for signal to ultrasonic to send a sound wave out
 #define fastSpeed 230 //value for fast motor speed
-#define speed 100 //value for slower motor speed
+#define speed 120 //value for slower motor speed was 100
 #define turnSpeed 180 //value for motor speed when turning
 #define highBackSpeed 235 //value for high motor speed
 #define lowBackSpeed 70 //value for low motor speed
@@ -27,7 +27,7 @@
 //parameters for the detection of objects
 int centerScan;
 int distance;
-const int turnTime = 50; //in miliseconds 
+const int turnTime = 90; //in miliseconds 
 int thereis;
 
 //
@@ -96,25 +96,21 @@ long watch(){
 void wallFollow(){
   head.write(180);
   stop();
-  long obstacleDist = watch(); //
-  if(watch < 5){
-    setSpeed(speed,speed);
-    backward();
-    delay(200);
-    setSpeed(fastSpeed,speed);
-    right();
-    delay(800);//*3/2);
-  }
-  if(obstacleDist <= 10){ 
-    setSpeed(fastSpeed,speed);
-    right();
-    delay(turnTime);//*3/2);
-  }
-  if (obstacleDist > 10){ //
-    setSpeed(speed,fastSpeed);
-    left();
-    delay(turnTime);//*3/2);
-  }
+  setSpeed(speed,speed);
+  backward();
+  delay(200);
+  right();
+  delay(800);
+  forward();
+  delay(200);
+  left();
+  delay(800);
+  forward();
+  delay(200);
+  left();
+  delay(800);
+  forward();
+  delay(200);
 }
 
 //creates an empty character array consisting of 5 items
@@ -169,6 +165,12 @@ void lineTracking(){
     setSpeed(fastSpeed,fastSpeed);
     delay(turnTime);
   } 
+  if (sensorVal=="00100"){
+    //turn right as the black line is on the right of the car
+    forward();  
+    setSpeed(speed,speed);
+    delay(turnTime);
+  } 
   stop();
   setSpeed(0,0);
 }
@@ -214,8 +216,9 @@ void goalSequence(){
       setSpeed(0,0); //stopping the car as the goal has been reached
       goalReached = true;
     }
-    else if (watch() < 5){
-      head.write(180);
+    //head.write(90);
+    else if (watch() <= 10){
+      head.write(90);
       stop();
       setSpeed(0,0); 
       setSpeed(fastSpeed,speed);
@@ -228,14 +231,14 @@ void goalSequence(){
       lineHit = false;
     } 
     else{
-      head.write(90);
+      //head.write(90);
       lineTracking();
     }
   }
   else if(!lineHit){
-    head.write(90);
     String sensorVal= getSensorValues();
-    if (sensorVal.indexOf("1") > 0){
+    if (sensorVal.indexOf("1") >= 0){
+      head.write(90);
       stop();
       setSpeed(0,0);
       right();

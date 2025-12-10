@@ -1,10 +1,4 @@
-/*
-To Do (REMOVE ONCE DONE):
-Test the code to make sure that it works
-Clean up the code
-Comment the code
-*/
-//bugAlgorithm - 
+//bugAlgorithmTweaked - 
 //Written by Nathaniel Okunwobi (240349422)
 
 //includes the servo library in the program

@@ -1,16 +1,6 @@
-/*
-To Do (REMOVE ONCE DONE):
-test and fix the code
-check how the robot moves its motors to make sure my code explanations of the dir pins is correct
-understand lines 98, 119
-do some testing to see if the speeds of the motors can be tweaked to improve performance/speed
-understand the line tracking function and explain each possible movement
-check and include comments on why there are delays for the motor conrol functions
-*/
-
 //lineTrackingAlgorithm - uses sensors to determing whether or not the robot is on the
 //and adjusts accordingly to make sure it remains on the line
-//Written by Nathaniel Okunwobi (240349422)
+//Written by Nathaniel Okunwobi
 
 //defining the constants for the individual sensors on the tracking sensor module
 #define lineSensor0 A0  
@@ -94,9 +84,6 @@ void setup(){
   stop();  
   Serial.begin(9600); //initialize serial for debugging
 }
-
-//
-boolean flag=false;
 
 //loop() function - continuously runs the lineTracking() function
 void loop(){ 

@@ -1,13 +1,8 @@
-/*
-To Do (REMOVE ONCE DONE):
-Comment the code
-Test the code to make sure that it works
-*/
 //obstacleAvoidanceAlgorithm - uses the ultrasonic sensor to prevent collision with
 //objects by turning away from them when they get too close in a give scan direction
-//Written by Nathaniel Okunwobi (240349422)
+//Written by Nathaniel Okunwobi 
 
-//
+//adds the servo library
 #include <Servo.h>
 
 //defining constants for pin numbers and the scan loop counter
@@ -30,13 +25,13 @@ Test the code to make sure that it works
 //defining variables for different positions in front of the robot as well as the
 //parameters for the detection of objects
 int leftScan, centerScan, rightScan, leftDiagonalScan, rightDiagonalScan;
-const int distanceLimit = 15; //in cm, was 15
+const int distanceLimit = 15; //in cm
 int distance;
 int numCycles = 0;
-const int turnTime = 350; //in miliseconds, was 275
+const int turnTime = 350; //in miliseconds
 int thereis;
 
-//
+//sets the variable name for control of the servo
 Servo head;
 
 //functions for controlling movement of the robot
@@ -76,13 +71,13 @@ void stop(){
   digitalWrite(leftDirectionPin2,LOW);
   setSpeed(0,0);
 }
-//setSpeed() function - 
+//setSpeed() function - sets the speed of the motors on each side of the robot
 void setSpeed(int leftSpeed,int rightSpeed){
   analogWrite(leftSpeedPin,leftSpeed); 
   analogWrite(rightSpeedPin,rightSpeed);   
 }
 
-//watch() function - 
+//watch() function - returns the rounded distance calculated from a reading from the ultrasonic distance sensor
 int watch(){
   long echoDistance;
   digitalWrite(triggerPin,LOW);
@@ -144,11 +139,12 @@ String watchSurrounding(){
   delay(300);
    String obstacleStr= String(obstacleStatus,BIN);
   obstacleStr= obstacleStr.substring(1,6);
-  
+
   return obstacleStr; //return 5-character string standing for 5 direction obstacle status
 
 }
-//obstacleAvoidance() function - 
+//obstacleAvoidance() function - checks for objects within a certain range for 5 different directions,
+//moving forward if there is nothing there and navigating around the object if there is something within that range
 void obstacleAvoidance(){
   ++numCycles;
   if(numCycles >= LPT){ //stops to check the surrounds every LPT cycles
@@ -213,7 +209,7 @@ void obstacleAvoidance(){
     thereis = 0;
   }
 }
-//setup() function - 
+//setup() function - defines the mode for each of the pins that will be used
 void setup(){
   pinMode(rightDirectionPin1, OUTPUT); 
   pinMode(rightDirectionPin2, OUTPUT); 
@@ -230,7 +226,7 @@ void setup(){
   delay(2000);
   Serial.begin(9600);
 }
-//loop() functions - 
+//loop() functions - repeatedly calls the obstacleAvoidance() function
 void loop(){
   obstacleAvoidance();
 }
