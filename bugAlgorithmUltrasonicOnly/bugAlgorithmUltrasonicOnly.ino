@@ -92,7 +92,7 @@ long watch(){
   return echoDistance;
 }
 
-//wallFollow() function - repeatedly calls watch() function and makes adjustments based on what it returns
+//wallFollow() function - takes a wide turn around an object until reaching a line
 void wallFollow(){
   head.write(180);
   stop();

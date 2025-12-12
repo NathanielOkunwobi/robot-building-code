@@ -16,8 +16,8 @@
 long rightEncoderCount = 0;
 long leftEncoderCount = 0;
 //routes to be followed, format is command then amount (encoder count for rotation and encoder count for translation), select between one of the two
-//String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; 
-String robotSteps[] = {"Forward", "50", "Left", "25", "Forward", "15", "Left", "30", "Forward", "50", "Right", "25", "Forward", "15", "Right", "30", "Forward", "50"};
+//String robotSteps[] = {"Forward", "100", "Left", "50", "Forward", "100"}; //seqeunce to reach a given (x,y) location
+String robotSteps[] = {"Forward", "50", "Left", "25", "Forward", "15", "Left", "30", "Forward", "50", "Right", "25", "Forward", "15", "Right", "30", "Forward", "50"}; //sequence for vacuum cleaner robot
 int moveTime = 125;
 int turnTime = 25;
 bool runComplete = false;
@@ -125,7 +125,6 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    //rightEncoderCount = 0;
   }else if (action == "Backward"){
     while (rightEncoderCount < amount){
       backward();
@@ -133,7 +132,6 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    //rightEncoderCount = 0;
   }else if (action == "Left"){
     while (leftEncoderCount < amount){
       left();
@@ -141,7 +139,6 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    //rightEncoderCount = 0;
   }else if (action == "Right"){
     while (rightEncoderCount < amount){
       right();
@@ -149,7 +146,6 @@ void actionReader(String action, int amount){
       stop();
     }
     stop();
-    //leftEncoderCount = 0;
   }else{
     stop();
   }

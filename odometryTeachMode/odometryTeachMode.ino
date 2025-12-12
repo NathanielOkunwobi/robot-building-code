@@ -10,7 +10,7 @@
 long leftEncoderCount = 0;
 long rightEncoderCount = 0;
 
-//sets the mode for the encoder pins, attaches interupts to them and initilizes 
+//sets the mode for the encoder pins, attaches interupts to them and initialises 
 //serial for debugging
 void setup() {
   pinMode(encoderLeftPin, INPUT);

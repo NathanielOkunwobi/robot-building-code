@@ -1,11 +1,6 @@
-/*
-To Do (REMOVE ONCE DONE):
-Test the code to make sure that it works
-Clean up the code
-Comment the code
-*/
-//wallFollowingAlgorithm - 
-//Written by Nathaniel Okunwobi (240349422)
+//wallFollowingAlgorithmForwardCollisionDetection - continuously checks the
+//distance from the side of the robot to a wall and make adjustments accordingly 
+//Written by Nathaniel Okunwobi
 
 //includes the servo library in the program
 #include <Servo.h>
@@ -32,10 +27,9 @@ Comment the code
 //defining variables for different positions in front of the robot as well as the
 //parameters for the detection of objects
 int centerScan;
-//const int distanceLimit = 10; //in cm
 int distance;
 int numCycles = 0;
-const int turnTime = 90; //in miliseconds (was 150)
+const int turnTime = 90; //in miliseconds
 int thereis;
 
 //creating an object of the servo class called head
@@ -85,7 +79,6 @@ void setSpeed(int leftSpeed,int rightSpeed){
 }
 
 //watch() function - returns the calculated distance from the ultrasonic distance sensor
-
 long watch(){
   long echoDistance;
   digitalWrite(triggerPin,LOW);
@@ -98,7 +91,6 @@ long watch(){
   return echoDistance;
 }
 
-
 //wallFollow() function - repeatedly calls watch() function and makes adjustments based on what it returns
 void wallFollow(){
   stop();
@@ -106,16 +98,12 @@ void wallFollow(){
   int rightIRVal=digitalRead(leftObstacleSensor);
   long obstacleDist = watch(); //
   if(leftIRVal==LOW && rightIRVal==LOW){
-    
     setSpeed(speed,speed);
-    
     backward();
     delay(200);
-    
     setSpeed(fastSpeed,speed);
     right();
     delay(800);//*3/2);
-    
   }
   if(obstacleDist <= 10){ 
     setSpeed(fastSpeed,speed);
